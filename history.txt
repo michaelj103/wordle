@@ -1,0 +1,4 @@
+sugar - 3
+whack - 4
+mount - 3
+perky - 4
