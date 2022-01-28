@@ -160,7 +160,7 @@ struct WordleTool: ParsableCommand {
             possibleAnswers = completeWords
         }
         
-        // all the reasonable words should be in the complete wordlist
+        // all the possible answers should be in the complete wordlist
         let countBefore = completeWords.count
         completeWords.formUnion(possibleAnswers)
         if completeWords.count > countBefore {
