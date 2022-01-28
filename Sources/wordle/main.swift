@@ -3,18 +3,13 @@ import Foundation
 
 struct WordleTool: ParsableCommand {
     @Option(name: .shortAndLong, help: "Wordlist. One word per line. Lowercase letters") var wordlist: String
-    @Option(name: .shortAndLong, help: "Wordlist of \"reasonable\" words. One per line. Lowercase letters") var reasonable: String?
+    @Option(name: .shortAndLong, help: "Subset of the wordlist that can be answers. One per line. Lowercase letters") var answers: String?
     @Option(name: .shortAndLong, help: "Best guess cutoff. Will suggest a best guess when reduced below this count if supplied") var cutoff: Int?
-    @Flag(name: .shortAndLong, help: "Assume the word is in the reasonable wordlist") var simplified: Bool = false
     @Flag(help: "Run in optimize mode to find the best initial guess") var optimize: Bool = false
     
     func validate() throws {
         if let c = cutoff, c <= 0 {
             throw ValidationError("Cutoff must be a positive integer")
-        }
-        
-        if simplified && (reasonable == nil) {
-            throw ValidationError("Can only use the simplified heuristic if a reasonable wordlist is supplied")
         }
     }
     
@@ -94,9 +89,8 @@ struct WordleTool: ParsableCommand {
         }
     }
     
-    private func runInteractive(_ allWords: Set<String>, reasonable: Set<String>?) {
-        // validation should require that simplified may only be true when reasonable is non-nil
-        let wordlist = simplified ? Wordlist(reasonable!) : Wordlist(allWords)
+    private func runInteractive(_ allWords: Set<String>, answers: Set<String>) {
+        let wordlist = Wordlist(answers)
         print("Running with \(wordlist.allWords.count) possible words and \(allWords.count) valid guesses")
         let allWordsArray = Array<String>(allWords)
         
@@ -114,9 +108,8 @@ struct WordleTool: ParsableCommand {
         }
     }
     
-    private func runBestGuess(_ allWords: Set<String>, reasonable: Set<String>?) {
-        // validation should require that simplified may only be true when reasonable is non-nil
-        let wordlist = simplified ? Wordlist(reasonable!) : Wordlist(allWords)
+    private func runBestGuess(_ allWords: Set<String>, answers: Set<String>) {
+        let wordlist = Wordlist(answers)
         print("Running with \(wordlist.allWords.count) possible words and \(allWords.count) valid guesses")
         let wordArray = Array<String>(allWords)
         
@@ -158,29 +151,27 @@ struct WordleTool: ParsableCommand {
         try file.open()
         var completeWords = try _readValidWords(file)
         
-        let reasonableWords: Set<String>?
-        if let reasonablePath = reasonable {
-            let reasonableFile = File(fileURL: URL(fileURLWithPath: reasonablePath))
-            try reasonableFile.open()
-            reasonableWords = try _readValidWords(reasonableFile)
+        let possibleAnswers: Set<String>
+        if let answersPath = answers {
+            let answersFile = File(fileURL: URL(fileURLWithPath: answersPath))
+            try answersFile.open()
+            possibleAnswers = try _readValidWords(answersFile)
         } else {
-            reasonableWords = nil
+            possibleAnswers = completeWords
         }
         
         // all the reasonable words should be in the complete wordlist
-        if let rWords = reasonableWords {
-            let countBefore = completeWords.count
-            completeWords.formUnion(rWords)
-            if completeWords.count > countBefore {
-                // it won't affect anything, but you should look into the data
-                print("Warning: \(completeWords.count - countBefore) word(s) in reasonable wordlist not in wordlist")
-            }
+        let countBefore = completeWords.count
+        completeWords.formUnion(possibleAnswers)
+        if completeWords.count > countBefore {
+            // it won't affect anything, but you should look into the data
+            print("Warning: \(completeWords.count - countBefore) word(s) in answer wordlist not in wordlist")
         }
         
         if optimize {
-            runBestGuess(completeWords, reasonable: reasonableWords)
+            runBestGuess(completeWords, answers: possibleAnswers)
         } else {
-            runInteractive(completeWords, reasonable: reasonableWords)
+            runInteractive(completeWords, answers: possibleAnswers)
         }
     }
 }

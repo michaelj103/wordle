@@ -84,11 +84,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--simplified"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-r /Users/mjb/Projects/Other/wordle/reasonable.txt"
+            argument = "-a /Users/mjb/Projects/Other/wordle/reasonable.txt"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
