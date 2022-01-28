@@ -107,41 +107,6 @@ struct WordleTool: ParsableCommand {
         dispatchMain()
     }
     
-    private func runInteractiveOld(_ allWords: Set<String>, reasonable: Set<String>?) {
-        // validation should require that simplified may only be true when reasonable is non-nil
-        let wordlist = simplified ? Wordlist(reasonable!) : Wordlist(allWords)
-        print("Running with \(wordlist.allWords.count) possible words and \(allWords.count) valid guesses")
-        let allWordsArray = Array<String>(allWords)
-
-        var currentWordlist = wordlist
-        while true {
-            do {
-                let (word, result) = try getInput()
-                let reduced = try currentWordlist.reducedWords(word, rules: result)
-                let remainingCount = reduced.count
-                currentWordlist = Wordlist(reduced)
-                print("Reduced to \(remainingCount) remaining words")
-                if remainingCount <= 10 {
-                    print("Remaining word(s):")
-                    for word in reduced {
-                        print(word)
-                    }
-                }
-                if remainingCount <= 1 {
-                    break
-                }
-
-                if let c = cutoff, remainingCount <= c && remainingCount > 2 {
-                    print("Computing recommendation...")
-                    let best = currentWordlist.bestGuesses(allWordsArray, reasonable: reasonable, showProgress: true)
-                    print("Recommended guesses: \(best)")
-                }
-            } catch {
-                print("Error: \(error)")
-            }
-        }
-    }
-    
     private func _bestGuessOutput(_ scoreByGuess: [String:Double], allWords: [String]) {
         let sorted = allWords.sorted { scoreByGuess[$0,default: Double.infinity] > scoreByGuess[$1,default: Double.infinity] }
         for (idx, word) in sorted.enumerated() {
@@ -155,10 +120,6 @@ struct WordleTool: ParsableCommand {
         print("Running with \(wordlist.allWords.count) possible words and \(allWords.count) valid guesses")
         let wordArray = Array<String>(allWords)
         
-        // method 1
-//        wordlist.printBestGuessList(wordArray, reasonable: reasonable)
-        
-        // method 2
         let calculator = GuessCalculator(wordlist, guesses: wordArray)
         calculator.run { numComplete in
             DispatchQueue.main.async {
