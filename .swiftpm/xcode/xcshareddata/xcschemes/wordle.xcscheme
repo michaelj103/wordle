@@ -80,11 +80,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--optimize"
+            argument = "-a /Users/mjb/Projects/Other/wordle/answers.txt"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-a /Users/mjb/Projects/Other/wordle/reasonable.txt"
+            argument = "--expected-turns roate"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

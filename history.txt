@@ -1,4 +1,5 @@
 sugar - 3
 whack - 4
 mount - 3
-perky - 4
+perky - 4.170
+could - 3.5

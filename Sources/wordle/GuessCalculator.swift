@@ -128,4 +128,9 @@ class GuessCalculator {
             completion(self.expectedReductionByGuess)
         }
     }
+    
+    func run(completion: @escaping ([String:Double])->()) {
+        func emptyProgressHandler(_: Int) {}
+        run(progress: emptyProgressHandler, completion: completion)
+    }
 }

@@ -6,10 +6,16 @@ struct WordleTool: ParsableCommand {
     @Option(name: .shortAndLong, help: "Subset of the wordlist that can be answers. One per line. Lowercase letters") var answers: String?
     @Option(name: .shortAndLong, help: "Best guess cutoff. Will suggest a best guess when reduced below this count if supplied") var cutoff: Int?
     @Flag(help: "Run in optimize mode to find the best initial guess") var optimize: Bool = false
+    @Option(help: "Automatically play using the given word as the first guess and subsequent computed best guesses to find the expected number of turns") var expectedTurns: String?
+    @Option(help: "Known answer. Only used if relevant") var knownAnswer: String?
     
     func validate() throws {
         if let c = cutoff, c <= 0 {
             throw ValidationError("Cutoff must be a positive integer")
+        }
+        
+        if let expectedTurnsString = expectedTurns, !Wordlist.wordIsValid(expectedTurnsString) {
+            throw ValidationError("Invalid first guess for expected-turns: \"\(expectedTurnsString)\"")
         }
     }
     
@@ -129,6 +135,26 @@ struct WordleTool: ParsableCommand {
         dispatchMain()
     }
     
+    private func runTurnCalculation(_ allWords: Set<String>, answers: Set<String>, firstGuess: String) {
+        let targetAnswers: [String]?
+        if let knownAnswer = knownAnswer {
+            targetAnswers = [knownAnswer]
+        } else {
+            targetAnswers = nil
+        }
+        do {
+            let autoGuesser = try AutoGuesser(firstWord: firstGuess, answers: answers, targetAnswers: targetAnswers, allWords: allWords)
+            autoGuesser.run {
+                WordleTool.exit(withError: nil)
+            }
+            dispatchMain()
+        }  catch let e as SimpleErr {
+            print("Error: \(e.description)")
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+    
     private func _readValidWords(_ file: File) throws -> Set<String> {
         var words = Set<String>()
         while let line = try file.readLine() {
@@ -170,6 +196,8 @@ struct WordleTool: ParsableCommand {
         
         if optimize {
             runBestGuess(completeWords, answers: possibleAnswers)
+        } else if let expectedTurnsString = expectedTurns {
+            runTurnCalculation(completeWords, answers: possibleAnswers, firstGuess: expectedTurnsString)
         } else {
             runInteractive(completeWords, answers: possibleAnswers)
         }
