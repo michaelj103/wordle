@@ -45,22 +45,20 @@ class AutoGuesser {
     }
 
     private var expectedTurnsByAnswer = [String:Double]()
+    // pathLengthCounts[n] == number of explored paths that took n turns to find answer
+    private var pathLengthCounts = [Int](repeating: 0, count: 8)
     private var processingQueue = [GuessItem]()
     private var lastProcessedAnswer: Int?
     private func _processNextAnswer() {
         let nextAnswerIndex: Int = (lastProcessedAnswer ?? -1) + 1
         lastProcessedAnswer = nextAnswerIndex
         // print progress
-        if nextAnswerIndex > 0 {
-            let ans = targetAnswers[nextAnswerIndex-1]
-            print("\(ans): \(expectedTurnsByAnswer[ans]!)")
-        }
-//        fputs("\r\(nextAnswerIndex)/\(targetAnswers.count)", stderr)
-//        fflush(stderr)
+        fputs("\r\(nextAnswerIndex)/\(targetAnswers.count)", stderr)
+        fflush(stderr)
         if nextAnswerIndex >= targetAnswers.count {
             // Done! Consolidate output
-//            fputs("\n", stderr)
-            print("Done")
+            fputs("\n", stderr)
+            _outputResults()
             completionHandler?()
             return
         }
@@ -85,6 +83,8 @@ class AutoGuesser {
         if nextGuess.word == nextGuess.answer {
             // got the answer, done with this branch
             let totalTurns = nextGuess.guesses + 1
+            let pathLength = min(7, totalTurns) // consider 7+ to be equally bad for final stats
+            pathLengthCounts[pathLength] += 1
             expectedTurnsByAnswer[nextGuess.answer,default: 0.0] += Double(totalTurns) * nextGuess.pathWeight
             DispatchQueue.main.async {
                 self._processQueue()
@@ -142,5 +142,25 @@ class AutoGuesser {
         }
         
         return Array<String>(bestWords)
+    }
+    
+    private func _outputResults() {
+        var total: Double = 0.0
+        for ans in targetAnswers {
+            let expectedTurns = expectedTurnsByAnswer[ans]!
+            total += expectedTurns
+            print("\(ans): \(expectedTurns)")
+        }
+        let average = total / Double(targetAnswers.count)
+        print("Average turns: \(average)")
+        let totalPaths = pathLengthCounts.reduce(0, +)
+        print("1 turn:   \(pathLengthCounts[1])")
+        print("2 turns:  \(pathLengthCounts[2])")
+        print("3 turns:  \(pathLengthCounts[3])")
+        print("4 turns:  \(pathLengthCounts[4])")
+        print("5 turns:  \(pathLengthCounts[5])")
+        print("6 turns:  \(pathLengthCounts[6])")
+        print("7+ turns: \(pathLengthCounts[7])")
+        print("Total paths explored: \(totalPaths)")
     }
 }
