@@ -47,6 +47,8 @@ class AutoGuesser {
     private var expectedTurnsByAnswer = [String:Double]()
     // pathLengthCounts[n] == number of explored paths that took n turns to find answer
     private var pathLengthCounts = [Int](repeating: 0, count: 8)
+    // pathLengthCounts[n] == odds of taking that many turns (times number of answers)
+    private var pathLengthOdds = [Double](repeating: 0.0, count: 8)
     private var processingQueue = [GuessItem]()
     private var lastProcessedAnswer: Int?
     private func _processNextAnswer() {
@@ -85,6 +87,7 @@ class AutoGuesser {
             let totalTurns = nextGuess.guesses + 1
             let pathLength = min(7, totalTurns) // consider 7+ to be equally bad for final stats
             pathLengthCounts[pathLength] += 1
+            pathLengthOdds[pathLength] += nextGuess.pathWeight
             expectedTurnsByAnswer[nextGuess.answer,default: 0.0] += Double(totalTurns) * nextGuess.pathWeight
             DispatchQueue.main.async {
                 self._processQueue()
@@ -154,13 +157,13 @@ class AutoGuesser {
         let average = total / Double(targetAnswers.count)
         print("Average turns: \(average)")
         let totalPaths = pathLengthCounts.reduce(0, +)
-        print("1 turn:   \(pathLengthCounts[1])")
-        print("2 turns:  \(pathLengthCounts[2])")
-        print("3 turns:  \(pathLengthCounts[3])")
-        print("4 turns:  \(pathLengthCounts[4])")
-        print("5 turns:  \(pathLengthCounts[5])")
-        print("6 turns:  \(pathLengthCounts[6])")
-        print("7+ turns: \(pathLengthCounts[7])")
+        print("1 turn:   \(pathLengthCounts[1]) (\(pathLengthOdds[1]))")
+        print("2 turns:  \(pathLengthCounts[2]) (\(pathLengthOdds[2]))")
+        print("3 turns:  \(pathLengthCounts[3]) (\(pathLengthOdds[3]))")
+        print("4 turns:  \(pathLengthCounts[4]) (\(pathLengthOdds[4]))")
+        print("5 turns:  \(pathLengthCounts[5]) (\(pathLengthOdds[5]))")
+        print("6 turns:  \(pathLengthCounts[6]) (\(pathLengthOdds[6]))")
+        print("7+ turns: \(pathLengthCounts[7]) (\(pathLengthOdds[7]))")
         print("Total paths explored: \(totalPaths)")
     }
 }
