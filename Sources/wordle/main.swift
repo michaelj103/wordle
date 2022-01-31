@@ -86,12 +86,20 @@ struct WordleTool: ParsableCommand {
     }
     
     private func _runInteractiveGuess(_ allWords: [String], wordlist: Wordlist) {
+        var retry = false
         do {
             try _runInteractiveGuessInternal(allWords, wordlist: wordlist)
         } catch let e as SimpleErr {
             print("Error: \(e.description)")
+            retry = true
         } catch {
             print("Error: \(error)")
+            retry = true
+        }
+        if retry {
+            DispatchQueue.main.async {
+                _runInteractiveGuess(allWords, wordlist: wordlist)
+            }
         }
     }
     
