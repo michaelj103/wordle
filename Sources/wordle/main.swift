@@ -8,6 +8,7 @@ struct WordleTool: ParsableCommand {
     @Flag(help: "Run in optimize mode to find the best initial guess") var optimize: Bool = false
     @Option(help: "Automatically play using the given word as the first guess and subsequent computed best guesses to find the expected number of turns") var expectedTurns: String?
     @Option(help: "Known answer. Only used if relevant") var knownAnswer: String?
+    @Option(help: "True recursive expected turns") var trueExpectedTurns: String?
     
     func validate() throws {
         if let c = cutoff, c <= 0 {
@@ -206,6 +207,10 @@ struct WordleTool: ParsableCommand {
             runBestGuess(completeWords, answers: possibleAnswers)
         } else if let expectedTurnsString = expectedTurns {
             runTurnCalculation(completeWords, answers: possibleAnswers, firstGuess: expectedTurnsString)
+        } else if let expectedTurnsString = trueExpectedTurns {
+            let expectedCalc = ExpectedTurnCalculator()
+            let expectation = expectedCalc.findExpectedTurnsForFirstGuess(expectedTurnsString, validGuesses: completeWords, wordlist: Wordlist(possibleAnswers))
+            print("Expected turns for \"\(expectedTurnsString)\": \(expectation)")
         } else {
             runInteractive(completeWords, answers: possibleAnswers)
         }

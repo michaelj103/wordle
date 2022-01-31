@@ -85,24 +85,15 @@ class GuessCalculator {
         }
     }
     
-    func run(progress: @escaping (Int)->(), completion: @escaping ([String:Double])->()) {
-        let workerCount = 4
+    private static let workerCount = 4
+    private func _runWorkers(clientProgress: @escaping (Int)->(), group: DispatchGroup) {
         let numGuesses = guesses.count
-        let baseWorkload = numGuesses / 4
-        let workloadRemainder = numGuesses % 4
+        let baseWorkload = numGuesses / GuessCalculator.workerCount
+        let workloadRemainder = numGuesses % GuessCalculator.workerCount
         var position = 0
         let reportingRate = [2, 3, 5, 7]
         
-        let group = DispatchGroup()
-        
-        func clientProgress(_ x: Int) {
-            answerQueue.async {
-                self.totalProgress += x
-                progress(self.totalProgress / workerCount)
-            }
-        }
-        
-        for i in 0..<workerCount {
+        for i in 0..<GuessCalculator.workerCount {
             // get the work for the worker
             let workload = baseWorkload + (i < workloadRemainder ? 1 : 0)
             let end = min(position + workload, guesses.count)
@@ -116,9 +107,23 @@ class GuessCalculator {
             let workQueue = DispatchQueue(label: "GuessWorker\(i)", qos: .userInitiated)
             workQueue.async {
                 worker.run { self._workerCompletion($0, id: i) }
-                group.leave()
+                self.answerQueue.async {
+                    group.leave()
+                }
             }
         }
+    }
+    
+    func run(progress: @escaping (Int)->(), completion: @escaping ([String:Double])->()) {
+        let group = DispatchGroup()
+        
+        func clientProgress(_ x: Int) {
+            answerQueue.async {
+                self.totalProgress += x
+                progress(self.totalProgress / GuessCalculator.workerCount)
+            }
+        }
+        _runWorkers(clientProgress: clientProgress, group: group)
         
         // when all the workers are done, notify completion
         group.notify(queue: answerQueue) {
@@ -132,5 +137,13 @@ class GuessCalculator {
     func run(completion: @escaping ([String:Double])->()) {
         func emptyProgressHandler(_: Int) {}
         run(progress: emptyProgressHandler, completion: completion)
+    }
+    
+    func runSync() -> [String:Double] {
+        func emptyProgressHandler(_: Int) {}
+        let group = DispatchGroup()
+        _runWorkers(clientProgress: emptyProgressHandler, group: group)
+        group.wait()
+        return self.expectedReductionByGuess
     }
 }

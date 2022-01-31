@@ -84,7 +84,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--expected-turns roate"
+            argument = "--true-expected-turns roate"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
