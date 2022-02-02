@@ -4,4 +4,6 @@ mount - 3
 perky - 4.170
 could - 3.5
 wrung - 3.5
-light - 4.0
+light - 4
+those - 3
+moist - 3
