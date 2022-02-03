@@ -7,3 +7,4 @@ wrung - 3.5
 light - 4
 those - 3
 moist - 3
+shard - 3
