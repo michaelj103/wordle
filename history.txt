@@ -8,3 +8,4 @@ light - 4
 those - 3
 moist - 3
 shard - 3
+pleat - 3
