@@ -197,7 +197,7 @@ struct Wordlist {
         var rejectedWords2 = Set<String>()
         for (ch, counts) in countsByLetter {
             let (min, max) = counts.countRange()
-            if min > 0 || max < 5 {
+            if min > 1 || max < 5 {
                 // we have an interesting range
                 for word in currentWords {
                     if !_isCountInRange(word, letter: ch, min: min, max: max) {
