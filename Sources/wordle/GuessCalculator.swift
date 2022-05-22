@@ -36,7 +36,7 @@ fileprivate class GuessWorker {
                     continue
                 }
                 
-                let response = Wordlist.responseForGuess(guess, answer: answer)
+                let response = WordRules.responseForGuess(guess, answer: answer)
                 if let reducedWords = try? wordlist.reducedWords(guess, rules: response), !reducedWords.isEmpty {
                     // Weight the magnitude of the reduction by the probability that this is the answer
                     // Assume all answers are equally likely

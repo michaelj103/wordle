@@ -14,7 +14,7 @@ struct WordleTool: ParsableCommand {
             throw ValidationError("Cutoff must be a positive integer")
         }
         
-        if let expectedTurnsString = expectedTurns, !Wordlist.wordIsValid(expectedTurnsString) {
+        if let expectedTurnsString = expectedTurns, !WordRules.wordIsValid(expectedTurnsString) {
             throw ValidationError("Invalid first guess for expected-turns: \"\(expectedTurnsString)\"")
         }
     }
@@ -24,7 +24,7 @@ struct WordleTool: ParsableCommand {
         guard let guess = readLine() else {
             throw SimpleErr("Expected a guess")
         }
-        guard Wordlist.wordIsValid(guess) else {
+        guard WordRules.wordIsValid(guess) else {
             throw SimpleErr("Invalid guess")
         }
         
@@ -32,7 +32,7 @@ struct WordleTool: ParsableCommand {
         guard let result = readLine() else {
             throw SimpleErr("Expected a result")
         }
-        let rules = try Wordlist.rulesFromString(result)
+        let rules = try WordRules.rulesFromString(result)
         return (guess, rules)
     }
     
@@ -173,7 +173,7 @@ struct WordleTool: ParsableCommand {
                 word = line
             }
             
-            if Wordlist.wordIsValid(word) {
+            if WordRules.wordIsValid(word) {
                 words.insert(word)
             }
         }

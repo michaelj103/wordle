@@ -96,7 +96,7 @@ class AutoGuesser {
             let currentWord = nextGuess.word
             
             // the next guess isn't correct. Figure out how it narrows the field and compute best follow-up guess(es)
-            let response = Wordlist.responseForGuess(currentWord, answer: nextGuess.answer)
+            let response = WordRules.responseForGuess(currentWord, answer: nextGuess.answer)
             if let reducedWords = try? nextGuess.wordlist.reducedWords(currentWord, rules: response), !reducedWords.isEmpty {
                 let reducedWordlist = Wordlist(reducedWords)
                 if reducedWords.count <= 2 {
