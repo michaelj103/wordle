@@ -50,7 +50,7 @@ struct WordleTool: ParsableCommand {
         let (word, result) = try getInput()
         let reduced = try wordlist.reducedWords(word, rules: result)
         let remainingCount = reduced.count
-        let currentWordlist = Wordlist(reduced)
+        let currentWordlist = WordlistNew(reduced)
         print("Reduced to \(remainingCount) remaining words")
         if remainingCount <= 10 {
             print("Remaining word(s):")
@@ -104,7 +104,7 @@ struct WordleTool: ParsableCommand {
     }
     
     private func runInteractive(_ allWords: Set<String>, answers: Set<String>) {
-        let wordlist = Wordlist(answers)
+        let wordlist = WordlistNew(answers)
         print("Running with \(wordlist.allWords.count) possible words and \(allWords.count) valid guesses")
         let allWordsArray = Array<String>(allWords)
         
@@ -123,7 +123,7 @@ struct WordleTool: ParsableCommand {
     }
     
     private func runBestGuess(_ allWords: Set<String>, answers: Set<String>) {
-        let wordlist = Wordlist(answers)
+        let wordlist = WordlistNew(answers)
         print("Running with \(wordlist.allWords.count) possible words and \(allWords.count) valid guesses")
         let wordArray = Array<String>(allWords)
         

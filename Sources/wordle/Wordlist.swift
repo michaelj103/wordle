@@ -19,7 +19,15 @@ fileprivate struct RuleCounts {
     }
 }
 
-struct Wordlist {
+protocol Wordlist {
+    
+    var allWords: Set<String> { get }
+    
+    func reducedWords(_ string: String, rules: [LetterRule]) throws -> Set<String>
+    
+}
+
+struct WordlistOld : Wordlist {
     
     // indexed by asciiValue - 'a'
     private let wordsByLetter: [Set<String>]
@@ -156,4 +164,23 @@ struct Wordlist {
     }
 }
 
+struct WordlistNew : Wordlist {
+    let allWords: Set<String>
+    
+    init<S: Sequence>(_ words: S) where S.Element == String {
+        allWords = Set<String>(words)
+    }
+    
+    func reducedWords(_ string: String, rules: [LetterRule]) throws -> Set<String> {
+        
+        var newSet = Set<String>()
+        for word in allWords {
+            let response = WordRules.responseForGuess(string, answer: word)
+            if response == rules {
+                newSet.insert(word)
+            }
+        }
+        return newSet
+    }
+}
 

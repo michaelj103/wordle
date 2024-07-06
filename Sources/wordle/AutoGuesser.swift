@@ -66,7 +66,7 @@ class AutoGuesser {
         }
         
         let answer = targetAnswers[nextAnswerIndex]
-        let wordlist = Wordlist(answers)
+        let wordlist = WordlistNew(answers)
         let guess = GuessItem(word: firstWord, answer: answer, guesses: 0, pathWeight: 1.0, wordlist: wordlist)
         processingQueue.append(guess)
         _processQueue()
@@ -98,7 +98,7 @@ class AutoGuesser {
             // the next guess isn't correct. Figure out how it narrows the field and compute best follow-up guess(es)
             let response = WordRules.responseForGuess(currentWord, answer: nextGuess.answer)
             if let reducedWords = try? nextGuess.wordlist.reducedWords(currentWord, rules: response), !reducedWords.isEmpty {
-                let reducedWordlist = Wordlist(reducedWords)
+                let reducedWordlist = WordlistNew(reducedWords)
                 if reducedWords.count <= 2 {
                     // for 1 or 2 remaining words, all should be attempted and weighted equally
                     DispatchQueue.main.async {
